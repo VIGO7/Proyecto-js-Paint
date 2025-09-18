@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"> </script>
+</head>
+<body>
+    <h1> "My paint isn't pain, it is all in your brain just check in your end cuz we will be there" </h1> <br> <h1> -Jason Torres- </h1> 
+  <script> 
+        let nombreMaria = "Maria";
+        let nombreAndres = "Andres";
+        let edadMaria = 47;
+        let edadtotal= 0;
+        let edadAndres = 77;
+        let esmayordeedad;
+        let nombreJohn = null;
+
+
+        console.log (edadtotal);
+        console.log (nombreMaria + "tiene" + edadMaria + "años")
+        console.log (nombreAndres + "tiene" + edadAndres + "años")
+     
+        calcularedad = () => {
+            //edad += 1;
+            if (edadMaria >= 18) {
+                esmayordeedad = true;
+            } else {
+                esmayordeedad = false;
+            }
+
+               if (edadAndres >= 18) {
+                esmayordeedad = true;
+            } else {
+                esmayordeedad = false;
+            }
+                
+            
+            edadtotal = edadAndres + edadMaria;
+        }
+         
+
+        calcularedad(); 
+        console.log(edadtotal); 
+        console.log(esmayordeedad);
+        console.log(nombreJohn); 
+    </script>
+</body>
+</html>
