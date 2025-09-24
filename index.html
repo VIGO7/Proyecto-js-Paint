@@ -1,50 +1,490 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"> </script>
+    <title>Persona 5 - Metaverse Drawing Space</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #000 100%);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(180deg, #1a0a0a 0%, #2a0a0a 100%);
+            border-right: 2px solid #dc143c;
+            padding: 20px;
+            box-shadow: 5px 0 20px rgba(220, 20, 60, 0.3);
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc143c;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+
+        .section {
+            margin-bottom: 25px;
+            background: rgba(220, 20, 60, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(220, 20, 60, 0.3);
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #dc143c;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tool-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 5px 0;
+            background: linear-gradient(135deg, #2a0a0a 0%, #1a0a0a 100%);
+            border: 1px solid #dc143c;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-btn:hover {
+            background: linear-gradient(135deg, #dc143c 0%, #a0102a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(135deg, #dc143c 0%, #a0102a 100%);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.6);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+            justify-items: center;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: block;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: #dc143c;
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.5);
+        }
+
+        .color-btn.active {
+            border-color: #dc143c;
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.8);
+            transform: scale(1.15);
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #dc143c;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        #drawing-canvas {
+            border: 2px solid #dc143c;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(220, 20, 60, 0.4);
+            background: #ffffff !important;
+        }
+
+        .header-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(220, 20, 60, 0.9) 0%, rgba(160, 16, 42, 0.9) 100%);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .audio-controls {
+            text-align: center;
+        }
+
+        .audio-btn {
+            background: linear-gradient(135deg, #2a0a0a 0%, #1a0a0a 100%);
+            border: 1px solid #dc143c;
+            color: #fff;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: linear-gradient(135deg, #dc143c 0%, #a0102a 100%);
+            transform: translateY(-2px);
+        }
+
+        .phantom-glow {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(220, 20, 60, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: phantomFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes phantomFloat {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-10px) translateX(5px); }
+            50% { transform: translateY(0px) translateX(-5px); }
+            75% { transform: translateY(10px) translateX(5px); }
+        }
+    </style>
 </head>
 <body>
-    <h1> "My paint isn't pain, it is all in your brain just check in your end cuz we will be there" </h1> <br> <h1> -Jason Torres- </h1> 
-  <script> 
-        let nombreMaria = "Maria";
-        let nombreAndres = "Andres";
-        let edadMaria = 47;
-        let edadtotal= 0;
-        let edadAndres = 77;
-        let esmayordeedad;
-        let nombreJohn = null;
-
-
-        console.log (edadtotal);
-        console.log (nombreMaria + "tiene" + edadMaria + "años")
-        console.log (nombreAndres + "tiene" + edadAndres + "años")
-     
-        calcularedad = () => {
-            //edad += 1;
-            if (edadMaria >= 18) {
-                esmayordeedad = true;
-            } else {
-                esmayordeedad = false;
-            }
-
-               if (edadAndres >= 18) {
-                esmayordeedad = true;
-            } else {
-                esmayordeedad = false;
-            }
-                
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="logo">METAVERSE STUDIO</div>
             
-            edadtotal = edadAndres + edadMaria;
-        }
-         
+            <div class="section">
+                <div class="section-title">Herramientas</div>
+                <button class="tool-btn active" data-tool="brush">🖌️ Pincel</button>
+                <button class="tool-btn" data-tool="eraser">🧽 Borrador</button>
+                <button class="tool-btn" data-tool="line">📏 Línea</button>
+                <button class="tool-btn" data-tool="circle">⭕ Círculo</button>
+                <button class="tool-btn" data-tool="rect">⬛ Rectángulo</button>
+            </div>
 
-        calcularedad(); 
-        console.log(edadtotal); 
-        console.log(esmayordeedad);
-        console.log(nombreJohn); 
+            <div class="section">
+                <div class="section-title">Colores</div>
+                <div class="color-palette">
+                    <div class="color-btn active" style="background-color: #dc143c; border-color: #fff;" data-color="#dc143c" title="Rojo Persona"></div>
+                    <div class="color-btn" style="background-color: #000000; border-color: #fff;" data-color="#000000" title="Negro"></div>
+                    <div class="color-btn" style="background-color: #ffffff; border-color: #dc143c;" data-color="#ffffff" title="Blanco"></div>
+                    <div class="color-btn" style="background-color: #ffd700; border-color: #fff;" data-color="#ffd700" title="Dorado"></div>
+                    <div class="color-btn" style="background-color: #4a90e2; border-color: #fff;" data-color="#4a90e2" title="Azul"></div>
+                    <div class="color-btn" style="background-color: #7b68ee; border-color: #fff;" data-color="#7b68ee" title="Púrpura"></div>
+                    <div class="color-btn" style="background-color: #32cd32; border-color: #fff;" data-color="#32cd32" title="Verde"></div>
+                    <div class="color-btn" style="background-color: #ff69b4; border-color: #fff;" data-color="#ff69b4" title="Rosa"></div>
+                    <div class="color-btn" style="background-color: #ff4500; border-color: #fff;" data-color="#ff4500" title="Naranja"></div>
+                    <div class="color-btn" style="background-color: #8b4513; border-color: #fff;" data-color="#8b4513" title="Marrón"></div>
+                    <div class="color-btn" style="background-color: #808080; border-color: #fff;" data-color="#808080" title="Gris"></div>
+                    <div class="color-btn" style="background-color: #40e0d0; border-color: #fff;" data-color="#40e0d0" title="Turquesa"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Configuración</div>
+                <div class="slider-container">
+                    <div class="slider-label">Grosor del pincel: <span id="brush-size-value">5</span></div>
+                    <input type="range" id="brush-size" class="slider" min="1" max="50" value="5">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Audio Metaverso</div>
+                <div class="audio-controls">
+                    <button class="audio-btn" id="play-note">🎵 Nota</button>
+                    <button class="audio-btn" id="clear-canvas">🗑️ Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="canvas-container">
+            <div class="header-bar">PHANTOM THIEVES DRAWING SPACE</div>
+            <div class="phantom-glow" style="top: 10%; right: 10%;"></div>
+            <div class="phantom-glow" style="bottom: 20%; left: 15%; animation-delay: 2s;"></div>
+        </div>
+    </div>
+
+    <script>
+        let canvas;
+        let currentTool = 'brush';
+        let currentColor = '#dc143c';
+        let brushSize = 5;
+        let isDrawing = false;
+        let startX, startY;
+        let audioInitialized = false;
+        
+        // Tone.js setup
+        let synth;
+        let bass;
+        let reverb;
+        let filter;
+        const notes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5'];
+        let noteIndex = 0;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let drawingSpeed = 0;
+
+        function setup() {
+            // Create canvas and attach to container
+            canvas = createCanvas(800, 600);
+            let canvasContainer = select('#canvas-container');
+            if (!canvasContainer) {
+                canvasContainer = select('.canvas-container');
+            }
+            canvas.parent(canvasContainer);
+            
+            // Set white background explicitly
+            background('#ffffff');
+            
+            // Set drawing properties
+            strokeCap(ROUND);
+            strokeJoin(ROUND);
+            
+            console.log('Canvas created successfully');
+        }
+
+        function draw() {
+            // This function runs continuously - keep it minimal
+        }
+
+        async function initAudio() {
+            if (!audioInitialized) {
+                try {
+                    await Tone.start();
+                    synth = new Tone.Synth().toDestination();
+                    audioInitialized = true;
+                    console.log('Audio initialized');
+                } catch (e) {
+                    console.log('Audio initialization failed:', e);
+                }
+            }
+        }
+
+        function mousePressed() {
+            // Check if mouse is within canvas bounds
+            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                isDrawing = true;
+                startX = mouseX;
+                startY = mouseY;
+                
+                // Initialize audio on first interaction
+                initAudio();
+                
+                if (currentTool === 'brush') {
+                    stroke(currentColor);
+                    strokeWeight(brushSize);
+                    strokeCap(ROUND);
+                    point(mouseX, mouseY);
+                    playDrawingSound();
+                } else if (currentTool === 'eraser') {
+                    stroke('#ffffff');
+                    strokeWeight(brushSize * 2);
+                    strokeCap(ROUND);
+                    point(mouseX, mouseY);
+                }
+            }
+            return false;
+        }
+
+        function mouseDragged() {
+            if (isDrawing && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                if (currentTool === 'brush') {
+                    stroke(currentColor);
+                    strokeWeight(brushSize);
+                    strokeCap(ROUND);
+                    line(pmouseX, pmouseY, mouseX, mouseY);
+                    
+                    if (frameCount % 3 === 0) {
+                        playDrawingSound();
+                    }
+                } else if (currentTool === 'eraser') {
+                    stroke('#ffffff');
+                    strokeWeight(brushSize * 2);
+                    strokeCap(ROUND);
+                    line(pmouseX, pmouseY, mouseX, mouseY);
+                }
+            }
+            return false;
+        }
+
+        function mouseReleased() {
+            if (isDrawing) {
+                if (currentTool === 'line') {
+                    stroke(currentColor);
+                    strokeWeight(brushSize);
+                    strokeCap(ROUND);
+                    line(startX, startY, mouseX, mouseY);
+                    playDrawingSound();
+                } else if (currentTool === 'circle') {
+                    stroke(currentColor);
+                    strokeWeight(brushSize);
+                    strokeCap(ROUND);
+                    noFill();
+                    let d = dist(startX, startY, mouseX, mouseY) * 2;
+                    ellipse(startX, startY, d, d);
+                    playDrawingSound();
+                } else if (currentTool === 'rect') {
+                    stroke(currentColor);
+                    strokeWeight(brushSize);
+                    strokeCap(ROUND);
+                    noFill();
+                    rect(startX, startY, mouseX - startX, mouseY - startY);
+                    playDrawingSound();
+                }
+            }
+            isDrawing = false;
+            return false;
+        }
+
+        function playDrawingSound() {
+            if (audioInitialized && synth) {
+                try {
+                    const mappedNote = map(mouseX, 0, width, 0, notes.length - 1);
+                    const noteToPlay = notes[Math.floor(mappedNote)];
+                    synth.triggerAttackRelease(noteToPlay, '16n');
+                } catch (e) {
+                    console.log('Sound playback failed:', e);
+                }
+            }
+        }
+
+        function clearCanvas() {
+            background('#ffffff');
+            console.log('Canvas cleared');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tool selection
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTool = this.getAttribute('data-tool');
+                });
+            });
+
+            // Color selection
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentColor = this.getAttribute('data-color');
+                });
+            });
+
+            // Brush size slider
+            const brushSizeSlider = document.getElementById('brush-size');
+            const brushSizeValue = document.getElementById('brush-size-value');
+            
+            brushSizeSlider.addEventListener('input', function() {
+                brushSize = parseInt(this.value);
+                brushSizeValue.textContent = brushSize;
+            });
+
+            // Audio controls
+            document.getElementById('play-note').addEventListener('click', async function() {
+                await initAudio();
+                if (audioInitialized && synth) {
+                    const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                    synth.triggerAttackRelease(randomNote, '4n');
+                }
+            });
+
+            document.getElementById('clear-canvas').addEventListener('click', function() {
+                clearCanvas();
+            });
+
+            // Prevent scrolling when drawing
+            document.body.addEventListener('touchstart', function(e) {
+                if (e.target === canvas.canvas) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            document.body.addEventListener('touchmove', function(e) {
+                if (e.target === canvas.canvas) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
     </script>
 </body>
 </html>
